@@ -1,0 +1,1 @@
+export default function About(){ return (<div className="card"><h1>About Carys</h1><p>Carys = Conversational Assistant for Responsive Yielding Solutions. British-accented AI built for clarity and privacy.</p></div>) }
