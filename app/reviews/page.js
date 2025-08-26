@@ -1,10 +1,12 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ReviewCard from '../../components/ReviewCard';
 import reviews from '../../data/reviews.json';
 
-export default function ReviewsPage() {
+function ReviewsInner() {
   const sp = useSearchParams();
   const page = Number(sp.get('page') || 1);
   const perPage = 12;
@@ -33,20 +35,18 @@ export default function ReviewsPage() {
           alignItems: 'center',
         }}
       >
-        {safePage > 1 && (
-          <a className="btn" href={`?page=${safePage - 1}`}>
-            Prev
-          </a>
-        )}
-        <span className="small">
-          Page {safePage} / {totalPages}
-        </span>
-        {safePage < totalPages && (
-          <a className="btn" href={`?page=${safePage + 1}`}>
-            Next
-          </a>
-        )}
+        {safePage > 1 && <a className="btn" href={`?page=${safePage - 1}`}>Prev</a>}
+        <span className="small">Page {safePage} / {totalPages}</span>
+        {safePage < totalPages && <a className="btn" href={`?page=${safePage + 1}`}>Next</a>}
       </div>
     </div>
+  );
+}
+
+export default function ReviewsPage() {
+  return (
+    <Suspense fallback={<div className="small">Loading reviews…</div>}>
+      <ReviewsInner />
+    </Suspense>
   );
 }
