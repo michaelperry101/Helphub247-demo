@@ -1,13 +1,13 @@
 "use client";
 import Link from "next/link";
-import {useSidebar} from "@/components/SidebarContext";
-import {usePathname} from "next/navigation";
+import { useSidebar } from "../components/SidebarContext";
+import { usePathname } from "next/navigation";
 
-function NavLink({href, children, onClick}) {
+function NavLink({ href, children, onClick }) {
   const active = usePathname() === href;
   return (
     <li>
-      <Link href={href} className="btn" onClick={onClick} aria-current={active ? "page": undefined}>
+      <Link href={href} className="btn" onClick={onClick} aria-current={active ? "page" : undefined}>
         {children}
       </Link>
     </li>
@@ -19,8 +19,8 @@ export default function Sidebar(){
 
   return (
     <>
-      <div className={`sidebar-overlay ${open ? "open": ""}`} onClick={close} />
-      <aside className={`sidebar-drawer ${open ? "open": ""}`}>
+      <div className={`sidebar-overlay ${open ? "open" : ""}`} onClick={close} />
+      <aside className={`sidebar-drawer ${open ? "open" : ""}`}>
         <ul className="menu">
           <NavLink href="/" onClick={close}>Home</NavLink>
           <NavLink href="/chat" onClick={close}>Chat</NavLink>
