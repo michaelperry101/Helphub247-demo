@@ -1,0 +1,1 @@
+export default function Terms(){ return (<div className="card"><h1>Terms & Conditions</h1><p>Use Helphub247 lawfully. Subscription renews monthly. Outputs are guidance only. Contact legal@helphub247.co.uk.</p></div>) }
