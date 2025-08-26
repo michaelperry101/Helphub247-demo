@@ -1,0 +1,1 @@
+export default function Billing(){ return (<div className="card" style={{maxWidth:640,margin:'0 auto'}}><h1>Billing</h1><p>Replace with Stripe customer portal when ready.</p><a className="btn" href="/subscribe">Go to Subscribe</a></div>) }
