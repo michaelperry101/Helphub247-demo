@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import {useSidebar} from "@/components/SidebarContext";
+import { useSidebar } from "../components/SidebarContext";
 
 export default function Header(){
   const { toggle } = useSidebar();
@@ -10,15 +10,13 @@ export default function Header(){
     <header className="header">
       <div className="header-inner">
         <button aria-label="Open menu" className="hamburger" onClick={toggle}>
-          {/* 3 lines */}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path d="M3 6h18M3 12h18M3 18h18" strokeWidth="2" strokeLinecap="round"/>
           </svg>
         </button>
 
         <Link href="/" className="logo-link" aria-label="Go home">
-          {/* Use your file name here */}
-          <Image src="/helphub247-logo.png" alt="HelpHub 24/7" width={180} height={56} priority />
+          <Image src="/helphub247-logo.png" alt="HelpHub 24/7" width={200} height={62} priority />
         </Link>
       </div>
     </header>
