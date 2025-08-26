@@ -20,3 +20,44 @@ a{text-decoration:none;color:inherit}
   .sidebar{position:fixed;left:0;top:64px;bottom:0;width:280px;transform:translateX(-110%);transition:transform .2s;z-index:60}
   .sidebar.open{transform:translateX(0)}
 }
+/* Bubble buttons with icons */
+.bubble {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin: 6px 0;
+  border-radius: 999px;
+  background: #f1f3f5;
+  border: 1px solid #e6edf3;
+  color: #0f172a;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .06s ease, background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.bubble .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bubble:hover {
+  background: #0ea5a4;      /* brand gradient start */
+  color: #fff;
+  border-color: #0ea5a4;
+  transform: translateY(-1px);
+}
+
+.sidebar .sidebar-link {
+  width: 100%;
+}
+
+/* Optional: tidy up the sidebar inner layout if needed */
+.sidebar .sidebar-content nav {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+}
