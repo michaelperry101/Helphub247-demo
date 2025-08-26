@@ -1,33 +1,31 @@
-"use client";
+"use client"
 import Link from "next/link";
+import { useState } from "react";
+import Image from "next/image";
+import Sidebar from "./Sidebar";
 
 export default function Header() {
-  // Tell the sidebar to toggle open/closed
-  const toggleSidebar = () =>
-    document.dispatchEvent(new CustomEvent("hh:toggleSidebar"));
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="header" role="banner">
-      <div className="header-inner">
-        {/* Left: hamburger in header */}
-        <button
-          className="hamburger-in-header"
+    <>
+      <header className="header">
+        {/* Hamburger on left */}
+        <button 
+          className="hamburger" 
+          onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle menu"
-          onClick={toggleSidebar}
         >
-          <span className="ham-line" />
-          <span className="ham-line" />
-          <span className="ham-line" />
+          ☰
         </button>
 
-        {/* Center: logo → home */}
-        <Link href="/" className="brand" aria-label="HelpHub247 Home">
-          <img src="/logo.jpg" alt="HelpHub247" className="brand-logo" />
+        {/* Logo in center, always links home */}
+        <Link href="/" className="logo">
+          <Image src="/logo.png" alt="HelpHub247" width={120} height={50} />
         </Link>
+      </header>
 
-        {/* Right spacer to keep brand perfectly centered */}
-        <div className="header-spacer" />
-      </div>
-    </header>
+      <Sidebar isOpen={isOpen} onClose={() => setIsOpen(false)} />
+    </>
   );
 }
