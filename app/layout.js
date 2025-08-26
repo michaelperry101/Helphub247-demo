@@ -1,20 +1,23 @@
-// app/layout.js
 import "./globals.css";
-import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
+import dynamic from "next/dynamic";
+import { SidebarProvider } from "@/components/SidebarContext";
 
-export const metadata = {
-  title: "Helphub247 — Carys",
-  description: "24/7 UK AI helpline.",
-};
+const Header  = dynamic(()=>import("@/components/Header"),  { ssr:false });
+const Sidebar = dynamic(()=>import("@/components/Sidebar"), { ssr:false });
+
+export const metadata = { title: "HelpHub 24/7 – Carys" };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <Header />
-        <Sidebar />
-        <main className="main">{children}</main>
+        <SidebarProvider>
+          <Header />
+          <div className="layout">
+            <Sidebar />
+            <main>{children}</main>
+          </div>
+        </SidebarProvider>
       </body>
     </html>
   );
