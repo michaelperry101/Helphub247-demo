@@ -1,16 +1,28 @@
-'use client'
-import Image from 'next/image'
-import Link from 'next/link'
-export default function Header(){
-  const toggle = ()=> document.querySelector('.sidebar')?.classList.toggle('open')
+"use client";
+import Link from "next/link";
+
+export default function Header() {
   return (
     <header className="header">
       <div className="header-inner">
-        <button onClick={toggle} className="btn" aria-label="Menu">☰</button>
-        <div style={{flex:1,display:'flex',justifyContent:'center'}}>
-          <Image src="/logo.svg" alt="Helphub247" width={160} height={36} priority />
-        </div>
+        {/* Left spacer keeps the brand centered even when the hamburger sits at far-left */}
+        <div className="header-spacer" />
+
+        {/* Brand (centered) */}
+        <Link href="/" className="brand" aria-label="HelpHub 24/7 home">
+          {/* If you prefer the image logo, keep the <img>. If not available, the text renders alone. */}
+          <img
+            src="/logo.png"
+            alt="HelpHub 24/7"
+            className="brand-logo"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
+          <span className="brand-text">HelpHub <strong>24/7</strong></span>
+        </Link>
+
+        {/* Right spacer mirrors the left to maintain center alignment */}
+        <div className="header-spacer" />
       </div>
     </header>
-  )
+  );
 }
