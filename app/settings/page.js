@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic';
 
 import { useEffect, useMemo, useState } from 'react';
 
-// Small inline UI helpers (no extra files)
 function Section({ title, children }) {
   return (
     <section style={{ marginTop: 18 }}>
@@ -23,31 +22,28 @@ function Row({ label, children, hint }) {
 }
 
 export default function Settings() {
-  // Gate client-only features
   const [ready, setReady] = useState(false);
 
   // Appearance
-  const [theme, setTheme] = useState('light');               // 'light' | 'dark'
-  const [fontSize, setFontSize] = useState(16);              // px
+  const [theme, setTheme] = useState('light');
+  const [fontSize, setFontSize] = useState(16);
   const [highContrast, setHighContrast] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
   // Voice & haptics
   const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [voiceAccent, setVoiceAccent] = useState('en-GB');   // en-GB default
+  const [voiceAccent, setVoiceAccent] = useState('en-GB');
   const [haptics, setHaptics] = useState(true);
 
   // Notifications
   const [emailNotifs, setEmailNotifs] = useState(false);
 
   // Data controls
-  const [saveChats, setSaveChats] = useState(true);          // local save
-  const accountEmail = useMemo(() => {
-    // Demo only – wire to real auth when you add it
-    return 'demo@helphub247.co.uk';
-  }, []);
+  const [saveChats, setSaveChats] = useState(true);
 
-  // -------- Load persisted preferences on mount
+  const accountEmail = useMemo(() => 'demo@helphub247.co.uk', []);
+
+  // Load persisted prefs
   useEffect(() => {
     try {
       setTheme(localStorage.getItem('hh_theme') || 'light');
@@ -63,7 +59,7 @@ export default function Settings() {
     setReady(true);
   }, []);
 
-  // -------- Apply and persist changes
+  // Persist + apply
   useEffect(() => {
     if (!ready) return;
     try {
@@ -86,8 +82,7 @@ export default function Settings() {
     voiceEnabled, voiceAccent, haptics, emailNotifs, saveChats
   ]);
 
-  // -------- Actions
-  const testVoice = async () => {
+  const testVoice = () => {
     if (!voiceEnabled) return;
     try {
       const u = new SpeechSynthesisUtterance(
@@ -101,12 +96,17 @@ export default function Settings() {
 
   const exportChats = () => {
     try {
-      // Collect chat threads stored as chat:<id> + list in hh_chats
       const allKeys = Object.keys(localStorage);
       const chatKeys = allKeys.filter(k => k.startsWith('chat:'));
-      const chats = chatKeys.map(k => ({ id: k.slice(5), messages: JSON.parse(localStorage.getItem(k) || '[]') }));
+      const chats = chatKeys.map(k => ({
+        id: k.slice(5),
+        messages: JSON.parse(localStorage.getItem(k) || '[]'),
+      }));
       const meta = JSON.parse(localStorage.getItem('hh_chats') || '[]');
-      const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), meta, chats }, null, 2)], { type: 'application/json' });
+      const blob = new Blob(
+        [JSON.stringify({ exportedAt: new Date().toISOString(), meta, chats }, null, 2)],
+        { type: 'application/json' }
+      );
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = 'helphub247-chats.json'; a.click();
@@ -119,7 +119,8 @@ export default function Settings() {
       const toRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && (k.startsWith('chat:') || k === 'hh_chats' || k === 'hh_activeChat'))) {
+        // ✅ fixed: removed extra ')'
+        if (k && (k.startsWith('chat:') || k === 'hh_chats' || k === 'hh_activeChat')) {
           toRemove.push(k);
         }
       }
@@ -156,31 +157,12 @@ export default function Settings() {
       <Section title="Appearance">
         <Row label="Theme">
           <div style={{ display: 'flex', gap: 10 }}>
-            <button
-              className="btn"
-              onClick={() => setTheme('light')}
-              aria-pressed={theme === 'light'}
-            >
-              Light
-            </button>
-            <button
-              className="btn"
-              onClick={() => setTheme('dark')}
-              aria-pressed={theme === 'dark'}
-            >
-              Dark
-            </button>
+            <button className="btn" onClick={() => setTheme('light')} aria-pressed={theme === 'light'}>Light</button>
+            <button className="btn" onClick={() => setTheme('dark')} aria-pressed={theme === 'dark'}>Dark</button>
           </div>
         </Row>
         <Row label="Text size" hint="Applies to this device.">
-          <input
-            type="range"
-            min="14"
-            max="20"
-            value={fontSize}
-            onChange={e => setFontSize(parseInt(e.target.value, 10))}
-            style={{ width: 240 }}
-          />{' '}
+          <input type="range" min="14" max="20" value={fontSize} onChange={e => setFontSize(parseInt(e.target.value, 10))} style={{ width: 240 }} />{' '}
           <span className="small">{fontSize}px</span>
         </Row>
         <Row label="High contrast">
@@ -235,4 +217,4 @@ export default function Settings() {
       </Section>
     </div>
   );
-                                                }
+}
