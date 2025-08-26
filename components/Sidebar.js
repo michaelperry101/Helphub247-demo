@@ -1,11 +1,21 @@
 "use client";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
-// tiny inline SVG icon helper
-const Icon = ({ name, size = 16 }) => {
-  const p = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" };
+/** Tiny inline icons (no packages) */
+const Icon = ({ name, size = 18 }) => {
+  const p = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+  };
   switch (name) {
     case "new": return <svg {...p}><path d="M12 5v14M5 12h14"/></svg>;
     case "home": return <svg {...p}><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>;
@@ -22,65 +32,84 @@ const Icon = ({ name, size = 16 }) => {
 };
 
 export default function Sidebar() {
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
 
-  // close on route change (mobile)
+  /** Header’s hamburger sends custom events we listen to */
+  useEffect(() => {
+    const toggle = () => setOpen(v => !v);
+    const close = () => setOpen(false);
+    document.addEventListener("hh:toggleSidebar", toggle);
+    document.addEventListener("hh:closeSidebar", close);
+    return () => {
+      document.removeEventListener("hh:toggleSidebar", toggle);
+      document.removeEventListener("hh:closeSidebar", close);
+    };
+  }, []);
+
+  /** Close when the route changes */
   useEffect(() => { setOpen(false); }, [pathname]);
 
-  // lock body scroll when open (mobile)
-  useEffect(() => {
-    if (open) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-  }, [open]);
+  const closeNow = () =>
+    document.dispatchEvent(new CustomEvent("hh:closeSidebar"));
 
-  const Item = ({ href, icon, children }) => {
-    const active = pathname === href || (href !== "/" && pathname?.startsWith(href));
-    return (
-      <Link href={href} className={`bubble sidebar-link ${active ? "active" : ""}`}>
-        <span className="icon"><Icon name={icon} /></span>
-        <span className="text">{children}</span>
-      </Link>
-    );
-  };
+  const items = [
+    { href: "/",        label: "Home",        icon: "home" },
+    { href: "/chat",    label: "Chat",        icon: "chat" },
+    { href: "/reviews", label: "Reviews",     icon: "reviews" },
+    { href: "/about",   label: "About Carys", icon: "about" },
+    { href: "/terms",   label: "Terms",       icon: "terms" },
+    { href: "/privacy", label: "Privacy",     icon: "privacy" },
+    { href: "/billing", label: "Billing",     icon: "billing" },
+    { href: "/subscribe", label: "Subscribe", icon: "subscribe" },
+    { href: "/settings",  label: "Settings",  icon: "settings" },
+  ];
+
+  const isActive = (href) =>
+    pathname === href || (href !== "/" && pathname?.startsWith(href));
 
   return (
     <>
-      {/* Hamburger button sits in header area left; keep your existing header button if you have one */}
-      <button
-        className="hamburger btn"
-        aria-label="Toggle menu"
-        aria-expanded={open}
-        onClick={() => setOpen(v => !v)}
+      {/* Dim background */}
+      <div className={`overlay ${open ? "show" : ""}`} onClick={closeNow} />
+
+      {/* Sliding drawer */}
+      <aside
+        className={`sidebar-panel ${open ? "open" : ""}`}
+        role="navigation"
+        aria-label="Main"
       >
-        ☰
-      </button>
-
-      {/* Dark overlay for mobile */}
-      <div className={`overlay ${open ? "show" : ""}`} onClick={() => setOpen(false)} />
-
-      <aside className={`sidebar-panel ${open ? "open" : ""}`} role="navigation" aria-label="Main">
         <div className="sidebar-scroller">
-          <button className="bubble sidebar-link" onClick={() => (window.location.href = '/chat')}>
+          {/* New chat action */}
+          <button
+            className="bubble sidebar-link"
+            onClick={() => { closeNow(); window.location.href = "/chat"; }}
+            aria-label="Start a new chat"
+          >
             <span className="icon"><Icon name="new" /></span>
             <span className="text">New chat</span>
           </button>
 
-          <div className="group">
-            <Item href="/" icon="home">Home</Item>
-            <Item href="/chat" icon="chat">Chat</Item>
-            <Item href="/reviews" icon="reviews">Reviews</Item>
-            <Item href="/about" icon="about">About Carys</Item>
-            <Item href="/terms" icon="terms">Terms</Item>
-            <Item href="/privacy" icon="privacy">Privacy</Item>
-            <Item href="/billing" icon="billing">Billing</Item>
-            <Item href="/subscribe" icon="subscribe">Subscribe</Item>
-            <Item href="/settings" icon="settings">Settings</Item>
-          </div>
+          {/* Menu items */}
+          <nav aria-label="Primary">
+            {items.map((it) => (
+              <Link
+                key={it.href}
+                href={it.href}
+                className={`bubble sidebar-link ${isActive(it.href) ? "active" : ""}`}
+                onClick={closeNow}
+              >
+                <span className="icon"><Icon name={it.icon} /></span>
+                <span className="text">{it.label}</span>
+              </Link>
+            ))}
+          </nav>
 
-          <div className="footer-note small">© {new Date().getFullYear()} Helphub247</div>
+          <div className="footer-note small">
+            © {new Date().getFullYear()} Helphub247
+          </div>
         </div>
       </aside>
     </>
   );
-  }
+              }
