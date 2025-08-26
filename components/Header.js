@@ -1,36 +1,24 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
+import { useState, useEffect } from "react";
 
 export default function Header() {
-  const toggleSidebar = () =>
-    document.dispatchEvent(new CustomEvent("hh:toggleSidebar"));
+  // provide a tiny event bus for sidebar toggle
+  const openSidebar = () => document.dispatchEvent(new CustomEvent("hh:openSidebar"));
 
   return (
-    <header className="header" role="banner">
+    <header className="header">
       <div className="header-inner">
-        {/* left: hamburger */}
-        <button
-          className="hamburger-in-header"
-          aria-label="Toggle menu"
-          onClick={toggleSidebar}
-        >
-          <span className="ham-line" />
-          <span className="ham-line" />
-          <span className="ham-line" />
+        <button className="hamburger" aria-label="Open menu" onClick={openSidebar}>
+          <span></span><span></span><span></span>
         </button>
 
-        {/* center: logo -> home (cache-busted) */}
-        <Link href="/" className="brand" aria-label="HelpHub247 Home">
-          <img
-            src="/logo.png?v=2"
-            alt="HelpHub247"
-            className="brand-logo"
-            onError={(e) => (e.currentTarget.style.display = "none")}
-          />
-        </Link>
-
-        {/* right spacer keeps logo perfectly centered */}
-        <div className="header-spacer" />
+        <div className="header-logo">
+          <Link href="/" className="logo-link" aria-label="Go home">
+            <Image src="/logo.png" alt="HelpHub247" width={140} height={36} priority />
+          </Link>
+        </div>
       </div>
     </header>
   );
