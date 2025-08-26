@@ -1,0 +1,1 @@
+Add OPENAI_API_KEY and OPENAI_MODEL in Vercel → Env Vars. Deploy. Visit /chat.
