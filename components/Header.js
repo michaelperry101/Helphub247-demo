@@ -1,25 +1,39 @@
 "use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import Sidebar from "./Sidebar";
 
 export default function Header() {
-  // provide a tiny event bus for sidebar toggle
-  const openSidebar = () => document.dispatchEvent(new CustomEvent("hh:openSidebar"));
+  const [open, setOpen] = useState(false);
 
   return (
     <header className="header">
       <div className="header-inner">
-        <button className="hamburger" aria-label="Open menu" onClick={openSidebar}>
-          <span></span><span></span><span></span>
+        {/* Hamburger */}
+        <button
+          className="hamburger"
+          onClick={() => setOpen(!open)}
+          aria-label="Menu"
+        >
+          ☰
         </button>
 
-        <div className="header-logo">
-          <Link href="/" className="logo-link" aria-label="Go home">
-            <Image src="/logo.png" alt="HelpHub247" width={140} height={36} priority />
-          </Link>
-        </div>
+        {/* Big Center Logo */}
+        <Link href="/" className="logo-link" onClick={() => setOpen(false)}>
+          <Image
+            src="/logo.png"   // make sure your file is /public/logo.png
+            alt="HelpHub247 Logo"
+            width={220}       // increased size
+            height={80}
+            priority
+          />
+        </Link>
       </div>
+
+      {/* Sidebar */}
+      <Sidebar open={open} setOpen={setOpen} />
     </header>
   );
 }
