@@ -1,248 +1,64 @@
-/* =========================
-   Theme vars & base
-========================= */
 :root{
-  --brand:#0ea5a4;       /* primary */
-  --brand2:#06b6d4;      /* gradient second */
-  --ink:#0f172a;         /* text */
-  --muted:#64748b;       /* secondary text */
-  --line:#e6edf3;        /* borders */
-  --bg:#ffffff;          /* surface */
-  --bg-soft:#f6f8fa;     /* soft pill */
-  --success:#10b981;
-  --danger:#ef4444;
+  --brand:#0ea5a4;
+  --ink:#0f172a;
+  --muted:#475569;
+  --bg:#ffffff;
+  --card:#ffffff;
+  --line:#e6edf3;
 }
+
 *{box-sizing:border-box}
 html,body{height:100%}
-body{
-  margin:0; color:var(--ink); background:var(--bg);
-  font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-button{font:inherit}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
 
-/* Remove mobile tap highlight */
-a,button,input,textarea,.bubble,.hamburger-in-header{-webkit-tap-highlight-color:transparent}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);text-decoration:none}
+.btn.primary{background:linear-gradient(135deg,#0ea5a4,#06b6d4);color:#fff;border-color:transparent}
+.btn:hover{opacity:.95}
 
-/* Utility */
-.small{font-size:12px;color:var(--muted)}
-.hidden{display:none!important}
-.center{display:flex;align-items:center;justify-content:center}
+/* Header */
+.header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line)}
+.header-inner{height:60px;display:grid;grid-template-columns:60px 1fr 60px;align-items:center;max-width:1100px;margin:0 auto;padding:0 10px}
+.hamburger{width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background:#fff;display:inline-flex;align-items:center;justify-content:center}
+.hamburger span{display:block;width:18px;height:2px;background:#111;margin:2px 0;border-radius:2px}
+.header-logo{display:flex;justify-content:center}
 
-/* =========================
-   Header: logo centered, hamburger left
-========================= */
-.header{
-  position:sticky; top:0; z-index:60;
-  background:#fff; border-bottom:1px solid var(--line);
-}
-.header-inner{
-  max-width:1120px; margin:0 auto; height:64px;
-  display:grid; grid-template-columns:48px 1fr 48px;
-  align-items:center; padding:0 12px;
-}
-.hamburger-in-header{
-  width:40px;height:40px;border-radius:12px;
-  border:1px solid var(--line);background:#fff;
-  display:inline-flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 14px rgba(15,23,42,.06);cursor:pointer;
-}
-.hamburger-in-header .ham-line{
-  width:18px;height:2px;background:#111;border-radius:2px;display:block;
-}
-.hamburger-in-header .ham-line + .ham-line{margin-top:4px}
+/* Layout */
+.main{max-width:1100px;margin:22px auto;padding:0 16px}
 
-.brand{justify-self:center;display:inline-flex;align-items:center;justify-content:center}
-.brand-logo{height:56px;width:auto}           /* bigger logo */
-@media (max-width:480px){ .brand-logo{height:48px} }
+/* Sidebar */
+.sidebar{position:fixed;inset:0 auto 0 0;width:320px;transform:translateX(-100%);transition:transform .25s ease;z-index:60;background:#fff;border-right:1px solid var(--line);padding:16px}
+.sidebar.open{transform:translateX(0)}
+.sidebar .menu{list-style:none;margin:0;padding:8px 0;display:flex;flex-direction:column;gap:12px}
+.pill{display:flex;align-items:center;gap:10px;background:#f3f7fb;border:1px solid var(--line);border-radius:999px;padding:14px 16px;text-decoration:none;color:#0f172a}
+.pill:hover{background:#eaf2f9}
+.copyright{margin-top:auto;color:#64748b;font-size:12px}
 
-/* =========================
-   Layout
-========================= */
-.layout{display:grid;grid-template-columns:1fr}
-main{padding:22px}
+/* Chat */
+.chat-wrap{display:flex;flex-direction:column;gap:12px;min-height:calc(100vh - 100px)}
+.messages{display:flex;flex-direction:column;gap:10px;padding-bottom:140px}
+.message{display:flex;gap:10px;align-items:flex-start}
+.message .avatar{width:32px;height:32px;border-radius:50%;background:#e6f9f7;color:#03635d;display:flex;align-items:center;justify-content:center;font-weight:600}
+.message.user .avatar{background:#e7f2ff;color:#0b5bd3}
+.message .bubble{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;max-width:85%}
+.message.user .bubble{background:#f8fbff}
 
-/* Cards / Buttons (generic) */
-.card{
-  background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;
-  box-shadow:0 8px 24px rgba(2,6,23,.04);
-}
-.btn{padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
-.btn.primary{background:linear-gradient(90deg,var(--brand),var(--brand2));color:#fff;border-color:transparent}
+/* Attachments chips */
+.attachments{display:flex;flex-wrap:wrap;gap:8px;margin:0 10px}
+.attach-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#f8fafc;color:#0f172a;font-size:13px}
+.attach-chip .remove{margin-left:6px;cursor:pointer}
 
-/* =========================
-   Sidebar drawer (bubble items with icons)
-========================= */
-.overlay{
-  position:fixed;inset:0;z-index:55;
-  background:rgba(2,6,23,.45);backdrop-filter:blur(1px);
-  opacity:0;pointer-events:none;transition:opacity .2s ease;
-}
-.overlay.show{opacity:1;pointer-events:auto}
+/* Chat bar */
+.chat-bar{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(to top, #fff, rgba(255,255,255,.9));border-top:1px solid var(--line);padding:12px}
+.chat-bar-inner{max-width:1100px;margin:0 auto;border:1px solid var(--line);border-radius:16px;background:#fff;display:flex;align-items:center;gap:8px;padding:8px}
+.icon-btn{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;display:inline-flex;align-items:center;justify-content:center}
+.icon-btn svg{width:20px;height:20px;stroke-width:2}
+.chat-input{flex:1;min-height:46px;max-height:160px;resize:none;border:0;outline:0;padding:10px 12px;font-size:16px}
+.mic-btn.listening{box-shadow:0 0 0 6px rgba(14,165,164,.12),0 0 0 12px rgba(14,165,164,.06);border-color:#0ea5a4}
+.listening-label{text-align:center;margin-top:6px;color:#0ea5a4;font-weight:600}
 
-.sidebar-panel{
-  position:fixed;top:64px;left:0;z-index:60;
-  height:calc(100dvh - 64px);
-  width:320px;max-width:86vw;background:#fff;
-  border-right:1px solid var(--line);
-  box-shadow:0 20px 40px rgba(2,6,23,.08);
-  transform:translateX(-100%);transition:transform .22s ease;
-  border-top-right-radius:14px;
+/* Responsive */
+@media (max-width:900px){
+  .header-inner{grid-template-columns:60px 1fr 0}
+  .sidebar{width:92%}
 }
-.sidebar-panel.open{transform:translateX(0)}
-.sidebar-scroller{height:100%;overflow:auto;padding:14px 14px 18px}
-
-.bubble{
-  display:flex;align-items:center;gap:10px;
-  width:100%;margin:8px 0;padding:12px 16px;
-  border-radius:999px;background:var(--bg-soft);border:1px solid var(--line);
-  color:var(--ink);font-size:15px;font-weight:600;
-  transition:background .15s ease,color .15s ease,transform .06s ease,border-color .15s ease;
-}
-.bubble:hover{background:var(--brand);color:#fff;border-color:var(--brand);transform:translateY(-1px)}
-.bubble.active{background:#e6fbf9;color:#0b726f;border-color:var(--brand)}
-.bubble:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-.sidebar-link .icon{display:inline-flex}
-.footer-note{margin-top:14px;color:#778}
-
-@media (min-width:1024px){
-  .overlay{display:none}
-  .sidebar-panel{width:360px;transform:translateX(0)}
-  main{margin-left:360px}
-}
-
-/* =========================
-   Chat page (GPT-style)
-========================= */
-
-/* Chat container fills viewport minus header */
-.chat-wrap{
-  min-height:calc(100dvh - 64px);
-  display:flex;flex-direction:column;
-}
-
-/* Messages stream */
-.messages{
-  flex:1; width:100%;
-  max-width:960px; margin:0 auto; padding:18px 12px 120px;  /* bottom padding for input bar */
-}
-.message{
-  display:flex; gap:10px; margin:10px 0;
-}
-.message .avatar{
-  flex:0 0 34px; height:34px; border-radius:50%;
-  background:#e2f6f4; display:flex;align-items:center;justify-content:center;
-  border:1px solid var(--line); font-weight:700; color:#0b726f;
-}
-.message .bubble{
-  margin:0; padding:12px 14px; border-radius:16px;
-  background:#fff; border:1px solid var(--line);
-  line-height:1.5;
-}
-.message.user .bubble{
-  background:linear-gradient(90deg,var(--brand),var(--brand2));
-  border-color:transparent; color:#fff;
-}
-.message.ai .bubble{ background:#f8fafc }
-
-/* Code blocks inside AI messages (optional) */
-.message pre{
-  background:#0b1020;color:#e6edf3;border-radius:10px;
-  padding:12px; overflow:auto; border:1px solid #111827;
-}
-
-/* =========================
-   Sticky chat bar (attachments + mic + send)
-========================= */
-.chat-bar{
-  position:fixed; left:0; right:0; bottom:0; z-index:40;
-  background:linear-gradient(0deg,#fff 70%,rgba(255,255,255,0.6) 100%);
-  border-top:1px solid var(--line);
-  padding:10px 12px;
-}
-.chat-bar-inner{
-  max-width:960px; margin:0 auto;
-  display:grid; grid-template-columns:auto 1fr auto auto; gap:8px;
-  align-items:center;
-}
-
-/* Input as big rounded field */
-.chat-input{
-  width:100%;
-  min-height:46px; max-height:160px;
-  resize:vertical;
-  padding:12px 14px;
-  border:1px solid var(--line);
-  background:#fff; color:var(--ink);
-  border-radius:18px;
-  outline:none;
-}
-.chat-input::placeholder{ color:#9aa4b2 }
-
-/* Icon buttons */
-.icon-btn{
-  width:44px;height:44px;border-radius:12px;
-  border:1px solid var(--line); background:#fff; cursor:pointer;
-  display:inline-flex; align-items:center; justify-content:center;
-  transition:transform .06s ease, background .15s ease, border-color .15s ease;
-}
-.icon-btn:hover{ transform:translateY(-1px); background:#f8fafc }
-.icon-btn:active{ transform:translateY(0) }
-.icon-btn svg{ width:20px; height:20px; stroke:currentColor }
-
-/* Send button emphasis */
-.send-btn{
-  background:linear-gradient(90deg,var(--brand),var(--brand2)); color:#fff;
-  border-color:transparent;
-}
-.send-btn:hover{ filter:brightness(1.04) }
-
-/* =========================
-   “Carys is listening” mic state
-========================= */
-
-/* pulse ring behind the mic when active */
-.mic-btn.listening{
-  position:relative;
-  color:#fff;
-  background:var(--brand);
-  border-color:transparent;
-  box-shadow:0 10px 24px rgba(14,165,164,.35);
-}
-.mic-btn.listening::after{
-  content:"";
-  position:absolute; inset: -6px; border-radius:16px;
-  border:2px solid rgba(14,165,164,.45);
-  animation:pulse 1.2s ease-out infinite;
-}
-@keyframes pulse{
-  0%{opacity:.85; transform:scale(1)}
-  70%{opacity:.1; transform:scale(1.18)}
-  100%{opacity:0; transform:scale(1.22)}
-}
-
-/* small “listening” label (optional) */
-.listening-label{
-  font-size:12px;color:#0b726f;margin-top:6px;text-align:center;
-}
-
-/* Attachments preview strip (optional) */
-.attachments{
-  max-width:960px; margin:6px auto 0; padding:0 4px;
-  display:flex; gap:8px; flex-wrap:wrap;
-}
-.attach-chip{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:6px 10px; border-radius:999px;
-  background:#f8fafc; border:1px solid var(--line);
-  font-size:13px; color:#0f172a;
-}
-.attach-chip .remove{ color:#9aa4b2; cursor:pointer }
-.attach-chip .remove:hover{ color:#ef4444 }
-
-/* =========================
-   Reviews grid (kept)
-========================= */
-.review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
