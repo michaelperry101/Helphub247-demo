@@ -1,132 +1,121 @@
 "use client";
-import React, { useRef, useState, useEffect } from "react";
+import {useEffect, useRef, useState} from "react";
 
-export default function ChatPage() {
+export default function ChatPage(){
+  const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
-  const [attachments, setAttachments] = useState([]);
-  const imageInputRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const taRef = useRef(null);
+  const [files, setFiles] = useState([]);        // {file, kind:"image"|"file"}
+  const listRef = useRef(null);
+  const fileRef = useRef(null);
+  const imageRef = useRef(null);
 
-  function onFilesSelected(e, kind) {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    const mapped = files.map(f => ({ file: f, kind, name: f.name, size: f.size }));
-    setAttachments(prev => [...prev, ...mapped]);
-    e.target.value = "";
-  }
-  function removeAttachment(name) {
-    setAttachments(prev => prev.filter(a => a.name !== name));
-  }
-  function handleSend() {
-    if (!text.trim() && attachments.length === 0) return;
-    // <-- call your existing send logic here, include `attachments`
-    // sendMessage({ text, attachments })
-    setText("");
-    setAttachments([]);
-    if (taRef.current) {
-      taRef.current.style.height = "40px";
+  useEffect(()=>{ listRef.current?.scrollTo({top:999999, behavior:"smooth"}); }, [messages]);
+
+  async function sendMessage(e){
+    e.preventDefault();
+    if(!text.trim() && files.length===0) return;
+
+    const userMsg = { role:"user", content:text, attachments:files };
+    setMessages(m=>[...m, userMsg]);
+    setText(""); setFiles([]);
+
+    try{
+      const res = await fetch("/api/chat", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+          messages: [...messages, userMsg].map(({role, content})=>({role, content}))
+        })
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || "Request failed");
+      setMessages(m=>[...m, {role:"assistant", content:data.reply || ""}]);
+    }catch(err){
+      setMessages(m=>[...m, {role:"assistant", content:"Sorry, I couldn’t generate a response."}]);
+      console.error(err);
     }
   }
-  // autosize textarea
-  useEffect(() => {
-    if (!taRef.current) return;
-    taRef.current.style.height = "40px";
-    taRef.current.style.height = taRef.current.scrollHeight + "px";
-  }, [text]);
+
+  function onPick(kind, ev){
+    const list = Array.from(ev.target.files||[]);
+    setFiles(prev => [
+      ...prev,
+      ...list.map(f => ({ file:f, kind, name:f.name, size:f.size }))
+    ]);
+  }
+  function removeChip(name){ setFiles(prev => prev.filter(x => x.name !== name)); }
 
   return (
     <div className="chat-wrap">
-      {/* ... your messages list here ... */}
-
-      {!!attachments.length && (
-        <div className="attachments">
-          {attachments.map(a => (
-            <span key={a.name} className="attach-chip">
-              <span className={a.kind === "image" ? "chip-dot teal" : "chip-dot purple"} />
-              <span className="chip-name">{a.name}</span>
-              <button className="chip-x" onClick={() => removeAttachment(a.name)} aria-label="Remove">×</button>
-            </span>
+      {/* scrollable messages */}
+      <div className="chat-scroll" ref={listRef}>
+        {messages.length===0 && (
+          <div className="center muted" style={{marginTop:24}}>
+            <div className="msg ai" style={{alignSelf:"center"}}>Carys is listening…</div>
+          </div>
+        )}
+        <div className="messages">
+          {messages.map((m, i)=>(
+            <div key={i} className={`msg ${m.role==="user" ? "user":"ai"}`}>
+              {m.content}
+            </div>
           ))}
         </div>
-      )}
+      </div>
 
-      <div className="chat-bar">
+      {/* bottom bar */}
+      <form className="chat-bar" onSubmit={sendMessage}>
         <div className="chat-bar-inner">
-          {/* Hidden native inputs */}
-          <input
-            ref={imageInputRef}
-            className="hidden-input"
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => onFilesSelected(e, "image")}
-          />
-          <input
-            ref={fileInputRef}
-            className="hidden-input"
-            type="file"
-            multiple
-            onChange={(e) => onFilesSelected(e, "file")}
-          />
+          {/* hidden inputs */}
+          <input ref={imageRef} className="hidden-input" type="file" accept="image/*" multiple onChange={ev=>onPick("image", ev)} />
+          <input ref={fileRef}  className="hidden-input" type="file" multiple onChange={ev=>onPick("file", ev)} />
 
-          {/* Coloured icon buttons */}
-          <button
-            type="button"
-            className="icon-btn teal"
-            aria-label="Upload images"
-            onClick={() => imageInputRef.current?.click()}
-            title="Upload images"
-          >
+          {/* icons (image / attach) */}
+          <button type="button" className="icon-btn teal" title="Add images" onClick={()=>imageRef.current?.click()}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <rect x="3" y="3" width="18" height="14" rx="2"></rect>
-              <circle cx="8" cy="8" r="2"></circle>
-              <path d="M21 15l-5-5-4 4-2-2-5 5"></path>
+              <path d="M4 5h16v14H4zM8 13l3-3 5 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="9" cy="8" r="1.5" />
             </svg>
           </button>
 
-          <button
-            type="button"
-            className="icon-btn purple"
-            aria-label="Upload files"
-            onClick={() => fileInputRef.current?.click()}
-            title="Upload files"
-          >
+          <button type="button" className="icon-btn purple" title="Attach files" onClick={()=>fileRef.current?.click()}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M21.44 11.05l-8.49 8.49a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L10.76 16.56a2 2 0 11-2.83-2.83l7.78-7.78"/>
+              <path d="M21 15V7a5 5 0 0 0-10 0v10a3 3 0 0 0 6 0V8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
 
-          {/* Bubble textarea */}
+          {/* text bubble */}
           <div className="bubble-input">
             <textarea
-              ref={taRef}
               className="chat-input"
-              placeholder="Carys is listening…"
+              placeholder="Message Carys…"
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={e=>setText(e.target.value)}
               rows={1}
             />
+            {/* attachment chips */}
+            {files.length>0 && (
+              <div className="attachments">
+                {files.map(f=>(
+                  <span key={f.name} className="attach-chip">
+                    <span className={`chip-dot ${f.kind==="image"?"teal":"purple"}`} />
+                    <span className="chip-name">{f.name}</span>
+                    <button type="button" className="chip-x" onClick={()=>removeChip(f.name)}>×</button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Mic (optional) */}
-          <button type="button" className="icon-btn orange" aria-label="Voice">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/>
-              <path d="M19 10a7 7 0 0 1-14 0"/>
-              <path d="M12 17v4"/>
-            </svg>
-          </button>
-
-          {/* Send */}
-          <button type="button" className="icon-btn blue" aria-label="Send" onClick={handleSend}>
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M22 2 11 13" />
-              <path d="M22 2 15 22 11 13 2 9l20-7z" />
+          {/* send */}
+          <button type="submit" className="icon-btn blue" title="Send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M22 2L11 13" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M22 2l-7 20-4-9-9-4 20-7z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
