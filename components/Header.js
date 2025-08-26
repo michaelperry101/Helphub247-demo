@@ -1,39 +1,26 @@
 "use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import Sidebar from "./Sidebar";
+import {useSidebar} from "@/components/SidebarContext";
 
-export default function Header() {
-  const [open, setOpen] = useState(false);
+export default function Header(){
+  const { toggle } = useSidebar();
 
   return (
     <header className="header">
       <div className="header-inner">
-        {/* Hamburger */}
-        <button
-          className="hamburger"
-          onClick={() => setOpen(!open)}
-          aria-label="Menu"
-        >
-          ☰
+        <button aria-label="Open menu" className="hamburger" onClick={toggle}>
+          {/* 3 lines */}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 6h18M3 12h18M3 18h18" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
         </button>
 
-        {/* Big Center Logo */}
-        <Link href="/" className="logo-link" onClick={() => setOpen(false)}>
-          <Image
-            src="/logo.png"   // make sure your file is /public/logo.png
-            alt="HelpHub247 Logo"
-            width={220}       // increased size
-            height={80}
-            priority
-          />
+        <Link href="/" className="logo-link" aria-label="Go home">
+          {/* Use your file name here */}
+          <Image src="/helphub247-logo.png" alt="HelpHub 24/7" width={180} height={56} priority />
         </Link>
       </div>
-
-      {/* Sidebar */}
-      <Sidebar open={open} setOpen={setOpen} />
     </header>
   );
 }
