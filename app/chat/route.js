@@ -1,11 +1,11 @@
 // app/api/chat/route.js
-export const runtime = 'edge'; // fast & cheap on Vercel Edge
+export const runtime = 'edge';
 
 const SYSTEM_PROMPT = `
 You are Carys — the "Conversational Assistant for Responsive Yielding Solutions."
-Tone: warm, helpful, concise, UK-friendly spelling. 
+Tone: warm, helpful, concise, UK-friendly spelling.
 If user mentions Helphub247, you are their 24/7 online helpline assistant.
-Avoid medical/financial/legal specifics; give general guidance + suggest speaking to a professional when appropriate.
+Avoid medical/financial/legal specifics; give general guidance + signpost to professionals when appropriate.
 `;
 
 export async function POST(req) {
@@ -19,14 +19,12 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: 'No input provided' }), { status: 400 });
     }
 
-    // Build messages (keep short history)
     const messages = [
       { role: "system", content: SYSTEM_PROMPT.trim() },
-      ...history.slice(-10), // last 10 turns to keep token use low
+      ...history.slice(-10),               // keep context light
       { role: "user", content: input || "(attachment)" },
     ];
 
-    // NOTE: basic text reply (no streaming) for simplicity & reliability
     const resp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
