@@ -10,11 +10,6 @@ export default function Header(){
         <div style={{flex:1,display:'flex',justifyContent:'center'}}>
           <Image src="/logo.svg" alt="Helphub247" width={160} height={36} priority />
         </div>
-        <nav style={{display:'flex',gap:12}}>
-          <Link href="/subscribe">Subscribe</Link>
-          <Link href="/settings">Settings</Link>
-          <Link href="/auth/login">Sign in</Link>
-        </nav>
       </div>
     </header>
   )
