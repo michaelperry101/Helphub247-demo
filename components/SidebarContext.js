@@ -1,5 +1,5 @@
 "use client";
-import {createContext, useContext, useState, useMemo} from "react";
+import {createContext, useContext, useMemo, useState} from "react";
 
 const SidebarCtx = createContext(null);
 
@@ -11,11 +11,12 @@ export function SidebarProvider({children}) {
     close: () => setOpen(false),
     openSidebar: () => setOpen(true),
   }), [open]);
+
   return <SidebarCtx.Provider value={value}>{children}</SidebarCtx.Provider>;
 }
 
-export function useSidebar(){ 
+export function useSidebar(){
   const ctx = useContext(SidebarCtx);
-  if(!ctx) throw new Error("useSidebar must be used inside <SidebarProvider>");
+  if (!ctx) throw new Error("useSidebar must be used inside <SidebarProvider>");
   return ctx;
 }
