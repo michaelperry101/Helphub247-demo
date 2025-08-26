@@ -1,7 +1,7 @@
 // app/layout.js
 import "./globals.css";
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
+import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
 
 export const metadata = {
   title: "Helphub247 — Carys",
