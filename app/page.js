@@ -1,0 +1,1 @@
+export default function Privacy(){ return (<div className="card"><h1>Privacy Policy</h1><p>Chats are stored locally by default. You have UK GDPR rights to access/erase. Contact privacy@helphub247.co.uk.</p></div>) }
