@@ -2,25 +2,30 @@
 import Link from "next/link";
 
 export default function Header() {
-  return (
-    <header className="header">
-      <div className="header-inner">
-        {/* Left spacer keeps the brand centered even when the hamburger sits at far-left */}
-        <div className="header-spacer" />
+  // Tell the sidebar to toggle open/closed
+  const toggleSidebar = () =>
+    document.dispatchEvent(new CustomEvent("hh:toggleSidebar"));
 
-        {/* Brand (centered) */}
-        <Link href="/" className="brand" aria-label="HelpHub 24/7 home">
-          {/* If you prefer the image logo, keep the <img>. If not available, the text renders alone. */}
-          <img
-            src="/logo.png"
-            alt="HelpHub 24/7"
-            className="brand-logo"
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          />
-          <span className="brand-text">HelpHub <strong>24/7</strong></span>
+  return (
+    <header className="header" role="banner">
+      <div className="header-inner">
+        {/* Left: hamburger in header */}
+        <button
+          className="hamburger-in-header"
+          aria-label="Toggle menu"
+          onClick={toggleSidebar}
+        >
+          <span className="ham-line" />
+          <span className="ham-line" />
+          <span className="ham-line" />
+        </button>
+
+        {/* Center: logo → home */}
+        <Link href="/" className="brand" aria-label="HelpHub247 Home">
+          <img src="/logo.jpg" alt="HelpHub247" className="brand-logo" />
         </Link>
 
-        {/* Right spacer mirrors the left to maintain center alignment */}
+        {/* Right spacer to keep brand perfectly centered */}
         <div className="header-spacer" />
       </div>
     </header>
