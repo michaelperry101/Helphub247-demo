@@ -3,9 +3,9 @@ export const dynamic = 'force-dynamic';
 
 import { useEffect, useMemo, useState } from 'react';
 
-function Section({ title, children }) {
+function Section({ id, title, children }) {
   return (
-    <section style={{ marginTop: 18 }}>
+    <section id={id} style={{ marginTop: 18 }}>
       <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>{title}</h2>
       <div className="card" style={{ padding: 14 }}>{children}</div>
     </section>
