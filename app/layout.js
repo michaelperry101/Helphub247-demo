@@ -1,10 +1,10 @@
 import "./globals.css";
 import dynamic from "next/dynamic";
-import SidebarProvider from "@/components/SidebarContext";
-import ThemeProvider from "@/components/ThemeProvider";
+import SidebarProvider from "../components/SidebarContext";
+import ThemeProvider from "../components/ThemeProvider";
 
-const Header  = dynamic(()=>import("@/components/Header"),  { ssr:false });
-const Sidebar = dynamic(()=>import("@/components/Sidebar"), { ssr:false });
+const Header  = dynamic(()=>import("../components/Header"),  { ssr:false });
+const Sidebar = dynamic(()=>import("../components/Sidebar"), { ssr:false });
 
 export const metadata = { title: "HelpHub 24/7 — Carys" };
 
