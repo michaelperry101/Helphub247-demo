@@ -1,19 +1,29 @@
-// app/api/chat/route.js
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
-export const runtime = "nodejs"; // use Node runtime (more forgiving for env vars)
+console.log("Using API key?", process.env.OPENAI_API_KEY ? "Yes" : "No");
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(req) {
   try {
-    // 1) Guard env
-    if (!process.env.OPENAI_API_KEY) {
-      console.error("OPENAI_API_KEY missing at runtime");
-      return NextResponse.json(
-        { error: "Server misconfig: missing OPENAI_API_KEY" },
-        { status: 500 }
-      );
-    }
+    const { messages } = await req.json();
+
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages,
+    });
+
+    return NextResponse.json({
+      reply: response.choices?.[0]?.message?.content ?? "",
+    });
+  } catch (err) {
+    console.error("OpenAI API Error:", err);
+    return NextResponse.json({ error: err.message || "Unknown error" }, { status: 500 });
+  }
+}
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
