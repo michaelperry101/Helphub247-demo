@@ -1,83 +1,71 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-const Icon = ({name}) => {
-  const p = {stroke:"currentColor", fill:"none", strokeWidth:"2", strokeLinecap:"round", strokeLinejoin:"round"};
-  switch(name){
-    case "image": return <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" strokeWidth="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><path {...p} d="M21 15l-5-5L5 21"/></svg>;
-    case "paperclip": return <svg viewBox="0 0 24 24"><path {...p} d="M21 8v8a7 7 0 1 1-14 0V7a5 5 0 0 1 10 0v8a3 3 0 1 1-6 0V8"/></svg>;
-    case "mic": return <svg viewBox="0 0 24 24"><rect {...p} x="9" y="2" width="6" height="11" rx="3"/><path {...p} d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg>;
-    case "send": return <svg viewBox="0 0 24 24"><path {...p} d="M22 2L11 13"/><path {...p} d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>;
-    default: return null;
-  }
-};
-
 export default function ChatPage(){
-  const [messages, setMessages] = useState([
-    // demo starting state
-  ]);
-  const [prompt, setPrompt] = useState("");
-  const listRef = useRef(null);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const listEnd = useRef(null);
+  const imgRef = useRef(null);
+  const fileRef = useRef(null);
 
-  useEffect(()=>{ if(listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight; }, [messages]);
+  useEffect(()=>{ listEnd.current?.scrollIntoView({behavior:"smooth"}); }, [messages]);
 
-  async function send(){
-    const text = prompt.trim();
+  async function send(e){
+    e.preventDefault();
+    const text = input.trim();
     if(!text) return;
-    setPrompt("");
+    setInput("");
     setMessages(m => [...m, {role:"user", content:text}]);
-
+    setBusy(true);
     try{
-      const res = await fetch("/api/chat", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ messages: [...messages, {role:"user", content:text}] })
-      });
-      if(!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      setMessages(m => [...m, {role:"assistant", content: data.reply ?? ""}]);
-    }catch(e){
-      setMessages(m => [...m, {role:"assistant", content:"(Sorry, I couldn’t generate a response.)"}]);
-    }
+      const r = await fetch("/api/chat", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({messages:[...messages, {role:"user", content:text}]})});
+      const data = await r.json();
+      setMessages(m => [...m, {role:"assistant", content:data.reply ?? "…" }]);
+    }catch{
+      setMessages(m => [...m, {role:"assistant", content:"Sorry, I couldn’t generate a response."}]);
+    }finally{ setBusy(false); }
   }
 
   return (
     <section className="chat-page">
-      <div className="messages" ref={listRef}>
-        {messages.map((m, i) => (
-          <div key={i} className={`msg ${m.role === "user" ? "user" : "ai"}`}>{m.content}</div>
+      <div className="messages">
+        {messages.length === 0 && (
+          <div className="center muted" style={{marginTop:12}}>Carys is listening…</div>
+        )}
+        {messages.map((m,i)=>(
+          <div key={i} className={`msg ${m.role}`}>
+            <div className="bubble">{m.content}</div>
+          </div>
         ))}
+        <div ref={listEnd} />
       </div>
 
-      {/* Fixed composer */}
+      {/* Bottom composer */}
       <div className="composer-wrap">
-        <div className="composer">
-          <label className="icon-btn img" title="Upload image">
-            <input type="file" accept="image/*" />
-            <Icon name="image" />
-          </label>
-          <label className="icon-btn file" title="Upload file">
-            <input type="file" />
-            <Icon name="paperclip" />
-          </label>
+        <form className="composer" onSubmit={send}>
+          <input ref={imgRef} type="file" accept="image/*" className="hidden-input" />
+          <button type="button" className="icon-btn img" title="Upload image" onClick={()=>imgRef.current?.click()}>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M21 19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="8.5" cy="8.5" r="1.5" fill="#fff"/></svg>
+          </button>
 
-          <span className="badge">Carys is listening…</span>
+          <input ref={fileRef} type="file" className="hidden-input" />
+          <button type="button" className="icon-btn file" title="Attach file" onClick={()=>fileRef.current?.click()}>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15V7a5 5 0 0 0-10 0v10a3 3 0 0 0 6 0V8"/></svg>
+          </button>
 
           <input
-            className="prompt"
+            className="textin"
             placeholder="Ask anything…"
-            value={prompt}
-            onChange={(e)=>setPrompt(e.target.value)}
-            onKeyDown={(e)=>{ if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); send(); }}}
+            value={input}
+            onChange={e=>setInput(e.target.value)}
+            onKeyDown={e=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); e.currentTarget.form?.dispatchEvent(new Event("submit",{cancelable:true,bubbles:true})); }}}
           />
 
-          <button className="icon-btn mic" title="Voice (coming soon)">
-            <Icon name="mic" />
+          <button type="submit" className="icon-btn send" disabled={busy}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
           </button>
-          <button className="icon-btn send" title="Send" onClick={send}>
-            <Icon name="send" />
-          </button>
-        </div>
+        </form>
       </div>
     </section>
   );
