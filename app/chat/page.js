@@ -2,46 +2,43 @@
 import { useEffect, useRef, useState } from "react";
 
 export default function ChatPage(){
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [busy, setBusy] = useState(false);
-  const listEnd = useRef(null);
+  const [messages,setMessages] = useState([]);
+  const [input,setInput] = useState("");
+  const [busy,setBusy] = useState(false);
+  const endRef = useRef(null);
   const imgRef = useRef(null);
   const fileRef = useRef(null);
 
-  useEffect(()=>{ listEnd.current?.scrollIntoView({behavior:"smooth"}); }, [messages]);
+  useEffect(()=>{ endRef.current?.scrollIntoView({behavior:"smooth"}); },[messages]);
 
   async function send(e){
     e.preventDefault();
     const text = input.trim();
     if(!text) return;
+    setMessages(m=>[...m,{role:"user",content:text}]);
     setInput("");
-    setMessages(m => [...m, {role:"user", content:text}]);
     setBusy(true);
     try{
-      const r = await fetch("/api/chat", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({messages:[...messages, {role:"user", content:text}]})});
+      const r = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[...messages,{role:"user",content:text}]})});
       const data = await r.json();
-      setMessages(m => [...m, {role:"assistant", content:data.reply ?? "…" }]);
+      setMessages(m=>[...m,{role:"assistant",content:data.reply ?? "…"}]);
     }catch{
-      setMessages(m => [...m, {role:"assistant", content:"Sorry, I couldn’t generate a response."}]);
+      setMessages(m=>[...m,{role:"assistant",content:"Sorry, I couldn’t generate a response."}]);
     }finally{ setBusy(false); }
   }
 
   return (
     <section className="chat-page">
       <div className="messages">
-        {messages.length === 0 && (
-          <div className="center muted" style={{marginTop:12}}>Carys is listening…</div>
-        )}
+        {messages.length===0 && <div className="center muted" style={{marginTop:12}}>Carys is listening…</div>}
         {messages.map((m,i)=>(
           <div key={i} className={`msg ${m.role}`}>
             <div className="bubble">{m.content}</div>
           </div>
         ))}
-        <div ref={listEnd} />
+        <div ref={endRef} />
       </div>
 
-      {/* Bottom composer */}
       <div className="composer-wrap">
         <form className="composer" onSubmit={send}>
           <input ref={imgRef} type="file" accept="image/*" className="hidden-input" />
@@ -59,7 +56,7 @@ export default function ChatPage(){
             placeholder="Ask anything…"
             value={input}
             onChange={e=>setInput(e.target.value)}
-            onKeyDown={e=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); e.currentTarget.form?.dispatchEvent(new Event("submit",{cancelable:true,bubbles:true})); }}}
+            onKeyDown={e=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); e.currentTarget.form?.requestSubmit(); }}}
           />
 
           <button type="submit" className="icon-btn send" disabled={busy}>
