@@ -1,40 +1,151 @@
-'use client'
-import {useEffect,useRef,useState} from 'react'
-export default function ChatWindow(){
-  const [messages,setMessages]=useState([])
-  const [text,setText]=useState('')
-  const [busy,setBusy]=useState(false)
-  const [chatId,setChatId]=useState(null)
-  const boxRef=useRef(null)
-  useEffect(()=>{
-    let id=localStorage.getItem('hh_activeChat')
-    if(!id){ id=String(Date.now()); localStorage.setItem('hh_activeChat',id); const list=JSON.parse(localStorage.getItem('hh_chats')||'[]'); list.unshift({id,title:'New chat',createdAt:new Date().toISOString()}); localStorage.setItem('hh_chats',JSON.stringify(list)) }
-    setChatId(id); setMessages(JSON.parse(localStorage.getItem('chat:'+id)||'[]'))
-  },[])
-  useEffect(()=>{ boxRef.current?.scrollTo({top:1e9,behavior:'smooth'}) },[messages])
-  const speak=(t)=>{ try{ const u=new SpeechSynthesisUtterance(t); u.lang='en-GB'; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u) }catch(e){} }
-  const send=async()=>{
-    if(!text.trim()) return
-    const user={role:'user',content:text}
-    const next=[...messages,user]; setMessages(next); setText(''); localStorage.setItem('chat:'+chatId, JSON.stringify(next)); setBusy(true)
-    try{
-      const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:next})})
-      const j=await r.json()
-      const reply={role:'assistant',content:j.reply || ('Carys (demo): '+text)}
-      const next2=[...next,reply]; setMessages(next2); localStorage.setItem('chat:'+chatId, JSON.stringify(next2)); speak(reply.content)
-    }catch(e){
-      const reply={role:'assistant',content:'Carys cannot reach the server.'}; const next2=[...next,reply]; setMessages(next2); localStorage.setItem('chat:'+chatId, JSON.stringify(next2))
-    }finally{ setBusy(false) }
+"use client";
+import { useEffect, useRef, useState } from "react";
+
+export default function ChatWindow() {
+  const [messages, setMessages] = useState([
+    { role: "assistant", content: "Hi, I’m Carys. How can I help today?" },
+  ]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [muted, setMuted] = useState(false); // 🔇 toggle
+  const listRef = useRef(null);
+  const fileRef = useRef(null);
+  const imageRef = useRef(null);
+
+  useEffect(() => {
+    // autoscroll to last message
+    listRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // ---- helpers --------------------------------------------------------------
+  async function speak(text) {
+    if (muted || !text?.trim()) return;
+
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text,
+          voice: "alloy", // try "verse" or "copper" if you prefer
+          format: "mp3",
+        }),
+      });
+
+      if (!res.ok) {
+        // don’t spam the UI; this is mostly for dev
+        console.warn("TTS failed:", await res.text());
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.play().catch(() => {});
+    } catch (e) {
+      console.warn("TTS error:", e);
+    }
   }
-  return (<div style={{display:'flex',flexDirection:'column',height:'78vh'}}>
-    <div ref={boxRef} style={{flex:1,overflowY:'auto'}}>
-      <div style={{display:'flex',flexDirection:'column',gap:8,marginTop:8}}>
-        {messages.map((m,i)=>(<div key={i} className={m.role==='user'?'msg user':'msg ai'}>{m.content}</div>))}
+
+  async function sendMessage(e) {
+    e?.preventDefault?.();
+    const text = input.trim();
+    if (!text || sending) return;
+
+    const next = [...messages, { role: "user", content: text }];
+    setMessages(next);
+    setInput("");
+    setSending(true);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: next }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        // surface clear error to user
+        const errMsg =
+          data?.error ||
+          data?.message ||
+          "I couldn’t generate a response. Please try again.";
+        setMessages((m) => [
+          ...m,
+          { role: "assistant", content: `⚠️ ${errMsg}` },
+        ]);
+      } else {
+        const reply = data?.reply || "…";
+        setMessages((m) => [...m, { role: "assistant", content: reply }]);
+        speak(reply); // 🔊 say the reply with OpenAI TTS
+      }
+    } catch (err) {
+      setMessages((m) => [
+        ...m,
+        {
+          role: "assistant",
+          content: `⚠️ Network error: ${err?.message || err}`,
+        },
+      ]);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  // ---- UI -------------------------------------------------------------------
+  return (
+    <div className="chat-wrap">
+      {/* header controls (optional) */}
+      <div className="chat-topbar">
+        <button
+          className={`pill ${muted ? "danger" : ""}`}
+          onClick={() => setMuted((v) => !v)}
+          aria-pressed={muted}
+          title={muted ? "Unmute Carys" : "Mute Carys"}
+        >
+          {muted ? "🔇 Muted" : "🔊 Voice on"}
+        </button>
       </div>
+
+      {/* message list */}
+      <ul className="chat-list" ref={listRef}>
+        {messages.map((m, i) => (
+          <li key={i} className={`msg ${m.role}`}>
+            <div className="bubble">{m.content}</div>
+          </li>
+        ))}
+      </ul>
+
+      {/* input bar */}
+      <form className="chat-inputbar" onSubmit={sendMessage}>
+        {/* image upload */}
+        <label className="icon-btn" title="Upload image">
+          <input ref={imageRef} type="file" accept="image/*" hidden />
+          <span className="icon img" aria-hidden>🖼️</span>
+        </label>
+
+        {/* file upload */}
+        <label className="icon-btn" title="Attach file">
+          <input ref={fileRef} type="file" hidden />
+          <span className="icon clip" aria-hidden>📎</span>
+        </label>
+
+        {/* (we removed export; mute lives up top) */}
+
+        <input
+          className="chat-input"
+          placeholder={sending ? "Carys is thinking..." : "Message Carys…"}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          disabled={sending}
+          aria-label="Message Carys"
+        />
+
+        <button className="send-btn" disabled={sending || !input.trim()}>
+          {sending ? "…" : "Send"}
+        </button>
+      </form>
     </div>
-    <div style={{display:'flex',gap:8,alignItems:'stretch'}}>
-      <textarea className="textarea" value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}} placeholder="Message Carys..."></textarea>
-      <button onClick={send} className="btn primary">{busy?'…':'Send'}</button>
-    </div>
-  </div>)
+  );
 }
